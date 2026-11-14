@@ -45,3 +45,9 @@ python scripts/run.py --plugin /path/to/plugin --json
 ## License
 
 MIT
+
+---
+
+### Explore all tools
+Looking for more ways to connect your agent? Browse my full catalog of AI agent skills for Jira, Sentry, DevOps, and agent observability.
+> **[View my Agensi storefront](https://www.agensi.io/r/CONTEXTBRIDGE?to=/creators/context-bridge)**
