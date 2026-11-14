@@ -1,4 +1,5 @@
 # DSH Plugin Scanner
+[![dsh.so risk](https://cdn.dsh.so/badge/dsh-plugin-scanner.svg)](https://www.dsh.so/artifact/dsh-plugin-scanner/?ref=badge)
 
 **Scan a DeepSeek Harness plugin for security red flags before installing it.**
 
