@@ -43,7 +43,32 @@ def scan_package_json(plugin):
             issues.append(("YELLOW", f"suspicious dependency: {d}"))
     return issues, data
 
+
+def check_obfuscation(plugin):
+    """Detects minified/compiled files where static analysis is blind."""
+    issues = []
+    for ext in ["*.js", "*.ts"]:
+        for f in plugin.rglob(ext):
+            if "node_modules" in f.parts or "dist" in f.parts:
+                continue
+            try:
+                text = f.read_text(errors="ignore")
+                lines = text.splitlines()
+                if not lines:
+                    continue
+                
+                # Heuristic: Check if the file has very long lines (minified)
+                long_lines = sum(1 for line in lines if len(line) > 500)
+                avg_line_len = sum(len(line) for line in lines) / len(lines)
+                
+                if long_lines > 0 or (avg_line_len > 200 and len(lines) > 5):
+                    issues.append(("UNCLEAR", f"{f.name} appears minified/compiled. Static analysis cannot read it safely."))
+            except Exception:
+                pass
+    return issues
+
 def scan_source(plugin):
+
     issues = []
     for ext in ["*.ts", "*.js", "*.tsx", "*.jsx"]:
         for f in plugin.rglob(ext):
@@ -88,9 +113,13 @@ def main():
         return 2
     issues, _ = scan_package_json(plugin)
     issues += scan_source(plugin)
+    issues += check_obfuscation(plugin)
     if args.json:
         print(json.dumps({"plugin": str(plugin), "issues": issues}, indent=2))
-        return 2 if any(i[0] == "RED" for i in issues) else (1 if issues else 0)
+        if any(i[0] == "RED" for i in issues): return 2
+        if any(i[0] == "YELLOW" for i in issues): return 1
+        if any(i[0] == "UNCLEAR" for i in issues): return 3
+        return 0
     return render(plugin, issues)
 
 if __name__ == "__main__":
